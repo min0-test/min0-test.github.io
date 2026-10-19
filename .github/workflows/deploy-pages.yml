@@ -1,0 +1,71 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix staff/order-console
+          npm ci --prefix staff/development-dashboard
+      - name: Build game
+        run: npm run build
+        env:
+          VITE_PAGES_BASE: /${{ github.event.repository.name }}/
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      - name: Build employee order console
+        run: npm run build --prefix staff/order-console
+        env:
+          VITE_PAGES_BASE: /${{ github.event.repository.name }}/order/
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
+      - name: Build development dashboard
+        run: npm run build --prefix staff/development-dashboard
+        env:
+          VITE_PAGES_BASE: /${{ github.event.repository.name }}/dev/
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
+      - name: Assemble Pages site
+        run: |
+          mkdir -p _site/order _site/dev
+          cp -R dist/. _site/
+          cp -R staff/order-console/dist/. _site/order/
+          cp -R staff/development-dashboard/dist/. _site/dev/
+          touch _site/.nojekyll
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
