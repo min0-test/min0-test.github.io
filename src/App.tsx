@@ -26,21 +26,44 @@ export default function App() {
   const [deviceOrder, setDeviceOrder] = useState<GuestOrder | null>(null);
   const [orderLoading, setOrderLoading] = useState(true);
   const [retryError, setRetryError] = useState('');
+<<<<<<< HEAD
+=======
+  const [menuError, setMenuError] = useState('');
+>>>>>>> temp-branch
   const scaleRef = useRef(1);
   const stageRef = useRef<HTMLDivElement>(null);
 
   const refreshOrders = useCallback(async () => {
+<<<<<<< HEAD
     if (!supabase) { setOrderLoading(false); return; }
     try {
       const [m, next] = await Promise.all([fetchMenu(), getDeviceOrder(deviceNo)]);
       setMenu(m);
+=======
+    const menuTask = fetchMenu().then((items) => {
+      setMenu(items);
+      setMenuError('');
+    }).catch((e: unknown) => {
+      console.error('Menu load failed', e);
+      setMenuError(e instanceof Error ? e.message : '메뉴를 불러오지 못했습니다.');
+    });
+    const orderTask = supabase ? getDeviceOrder(deviceNo).then((next) => {
+>>>>>>> temp-branch
       const resumed = g.phase === 'title' && (next?.status === 'queued' || next?.status === 'ready');
       if (g.phase === 'title' && next?.status === 'queued') startGame(g);
       else if (g.phase === 'title' && next?.status === 'ready') g.phase = 'over';
       setDeviceOrder(next);
       if (resumed) setFrame((f) => f + 1);
+<<<<<<< HEAD
     } catch (e) { console.error('Order sync failed', e); }
     finally { setOrderLoading(false); }
+=======
+    }).catch((e: unknown) => {
+      console.error('Device order sync failed', e);
+    }) : Promise.resolve();
+    await Promise.all([menuTask, orderTask]);
+    setOrderLoading(false);
+>>>>>>> temp-branch
   }, [deviceNo, g]);
 
   useEffect(() => {
@@ -157,7 +180,11 @@ export default function App() {
   const nextTut = () => { if (g.tut >= TUT_STEPS.length - 1) finishTutorial(); else g.tut++; };
   const skipTut = finishTutorial;
   const replayIfStillQueued = async () => {
+<<<<<<< HEAD
     if (!supabase || !deviceOrder) return;
+=======
+    if (!supabase || !deviceOrder) { setRetryError(''); startGame(g); return; }
+>>>>>>> temp-branch
     const status = await getGuestOrderStatus(deviceOrder.id);
     if (!status) { setRetryError('주문 상태를 확인할 수 없습니다. 잠시 후 다시 눌러 주세요.'); return; }
     setRetryError('');
@@ -202,7 +229,11 @@ export default function App() {
           ? <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#09051ceF] text-center text-white"><div className="text-[100px]">🥤</div><div className="text-[54px] font-black">음료가 준비됐어요!</div><div className="mt-4 rounded-3xl border-4 border-white/80 bg-violet-950/70 px-10 py-6 text-[30px] font-black">기기 번호 <span className="text-yellow-300">{deviceNo}</span>번에서 수령해 주세요</div><div className="mt-5 text-[20px] font-bold text-violet-200">직원에게 이름을 확인하고 음료를 받아 주세요</div><div className="mt-3 text-[15px] text-violet-300/80">수령이 확인되면 새 주문 화면으로 돌아갑니다</div></div>
           : <GameOver g={g} message={retryError} onRetry={() => { void replayIfStillQueued(); }} />)}
       </div>
+<<<<<<< HEAD
       {g.phase === 'title' && createPortal(<OrderEntry deviceNo={deviceNo} menu={menu} loading={orderLoading} connected={!!supabase} onSubmit={async (customerName, birthdate, menuId) => {
+=======
+      {g.phase === 'title' && createPortal(<OrderEntry deviceNo={deviceNo} menu={menu} loading={orderLoading} connected={!!supabase} menuError={menuError} onPlayWithoutOrder={() => { setDeviceOrder(null); setRetryError(''); startGame(g); }} onSubmit={async (customerName, birthdate, menuId) => {
+>>>>>>> temp-branch
         if (!supabase) return 'Supabase 연결을 확인해 주세요.';
         try {
           const data = await createGuestOrder({ customerName: customerName.trim(), birthdate, menuId, deviceNo });
