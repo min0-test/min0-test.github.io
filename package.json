@@ -6,12 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-<<<<<<< HEAD
-    "preview": "vite preview"
-=======
     "preview": "vite preview --host 0.0.0.0",
     "preview:build": "npm run build && vite preview --host 0.0.0.0"
->>>>>>> temp-branch
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",

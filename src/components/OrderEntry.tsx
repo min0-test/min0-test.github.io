@@ -53,11 +53,7 @@ function WheelColumn({ label, items, value, onChange, onTouch }: { label: string
   </div><span className="wheelFade top"/><span className="wheelFade bottom"/></div></div>;
 }
 
-<<<<<<< HEAD
-export function OrderEntry({ deviceNo, menu, loading, connected, onSubmit }: { deviceNo: number; menu: MenuItem[]; loading: boolean; connected: boolean; onSubmit: (name: string, birthdate: string, menuId: string) => Promise<string> }) {
-=======
 export function OrderEntry({ deviceNo, menu, loading, connected, menuError, onSubmit, onPlayWithoutOrder }: { deviceNo: number; menu: MenuItem[]; loading: boolean; connected: boolean; menuError: string; onSubmit: (name: string, birthdate: string, menuId: string) => Promise<string>; onPlayWithoutOrder: () => void }) {
->>>>>>> temp-branch
   const [page, setPage] = useState<0 | 1>(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [name, setName] = useState('');
@@ -68,10 +64,7 @@ export function OrderEntry({ deviceNo, menu, loading, connected, menuError, onSu
   const [selected, setSelected] = useState('');
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
-<<<<<<< HEAD
-=======
   const [allowPlayWithoutOrder, setAllowPlayWithoutOrder] = useState(false);
->>>>>>> temp-branch
   const available = menu.filter((item) => item.available);
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -97,13 +90,6 @@ export function OrderEntry({ deviceNo, menu, loading, connected, menuError, onSu
     setSending(true); setError('');
     try {
       const message = await onSubmit(name.trim(), birthdate, selected);
-<<<<<<< HEAD
-      if (message) setError(message);
-    } catch {
-      setError('주문을 전송하지 못했습니다. 연결을 확인한 뒤 다시 시도해 주세요.');
-    } finally { setSending(false); }
-  };
-=======
       if (message) { setError(message); setAllowPlayWithoutOrder(true); }
     } catch {
       setError('주문을 전송하지 못했습니다. 연결을 확인한 뒤 다시 시도해 주세요.');
@@ -112,7 +98,6 @@ export function OrderEntry({ deviceNo, menu, loading, connected, menuError, onSu
   };
   const hasOrderMenu = connected && !menuError && available.length > 0;
   const playWithoutOrder = !loading && (!hasOrderMenu || allowPlayWithoutOrder);
->>>>>>> temp-branch
   return <div className="orderExperience"><div className="orderAmbient ambientOne"/><div className="orderAmbient ambientTwo"/>
     <main className="orderLayout">
       <header className="orderHeader"><div className="orderBrand"><span className="orderLogo"><Coffee size={19}/></span><span>우주 한입</span></div><span className="stationPill">기기 <b>{deviceNo}</b></span></header>
@@ -128,21 +113,12 @@ export function OrderEntry({ deviceNo, menu, loading, connected, menuError, onSu
           </div></div>
         </> : <>
           <div className="orderIntro"><span className="orderEyebrow">CHOOSE YOUR DRINK</span><h1>오늘은 어떤 맛으로<br/>여행할까요?</h1><p>마음에 드는 음료 하나를 골라주세요.</p></div>
-<<<<<<< HEAD
-          <div className="drinkGrid">{available.map((item) => <button type="button" key={item.id} className={`drinkOption ${selected === item.id ? 'chosen' : ''}`} onClick={() => { setSelected(item.id); setError(''); }}><span className="drinkEmoji">{['🍏','🥭','🍊','🍇','🌿','🍊','🍍','🍈','🍓','🍈','🍋','🫐'][menu.findIndex((m) => m.id === item.id) % 12]}</span><span>{item.name}</span>{selected === item.id && <Check className="drinkCheck" size={17}/>}</button>)}</div>
-          {!loading && available.length === 0 && <div className="emptyDrinks">{connected ? '지금 주문할 수 있는 음료가 없어요.' : '메뉴를 불러오지 못했어요.'}</div>}
-        </>}
-      </section>
-      {error && <div className="orderError" role="alert">{error}</div>}
-      <footer className="orderFooter">{page === 0 ? <button className="continueButton" disabled={!validInfo} onClick={() => movePage(1)}>메뉴 고르기 <ChevronRight size={19}/></button> : <div className="footerActions"><button className="backButton" onClick={() => movePage(0)}><ChevronLeft size={18}/> 이전</button><button className="continueButton" disabled={!selected || sending || loading || !connected} onClick={() => void submit()}>{sending ? <><LoaderCircle className="buttonSpin" size={18}/> 주문 중</> : <>주문하고 게임 시작 <ChevronRight size={19}/></>}</button></div>}
-=======
           <div className="drinkGrid">{available.map((item) => <button type="button" key={item.id} className={`drinkOption ${selected === item.id ? 'chosen' : ''}`} onClick={() => { setSelected(item.id); setError(''); setAllowPlayWithoutOrder(false); }}><span className="drinkEmoji">{['🍏','🥭','🍊','🍇','🌿','🍊','🍍','🍈','🍓','🍈','🍋','🫐'][menu.findIndex((m) => m.id === item.id) % 12]}</span><span>{item.name}</span>{selected === item.id && <Check className="drinkCheck" size={17}/>}</button>)}</div>
           {!loading && available.length === 0 && <div className="emptyDrinks">{menuError || (connected ? '지금 주문할 수 있는 음료가 없어요.' : '메뉴를 불러오지 못했어요.')}</div>}
         </>}
       </section>
       {error && <div className="orderError" role="alert">{error}</div>}
       <footer className="orderFooter">{page === 0 ? <button className="continueButton" disabled={!validInfo} onClick={() => movePage(1)}>메뉴 고르기 <ChevronRight size={19}/></button> : <div className="footerActions"><button className="backButton" onClick={() => movePage(0)}><ChevronLeft size={18}/> 이전</button><button className="continueButton" disabled={sending || loading || (!playWithoutOrder && (!selected || !connected))} onClick={() => playWithoutOrder ? onPlayWithoutOrder() : void submit()}>{sending ? <><LoaderCircle className="buttonSpin" size={18}/> 주문 중</> : playWithoutOrder ? <>주문 없이 게임 시작 <ChevronRight size={19}/></> : <>주문하고 게임 시작 <ChevronRight size={19}/></>}</button></div>}
->>>>>>> temp-branch
         <p>{page === 0 ? '정보는 주문 확인에만 사용돼요.' : '주문 후에는 편하게 게임을 즐겨 주세요.'}</p>
       </footer>
     </main>

@@ -38,41 +38,23 @@ jobs:
       - name: Build game
         run: npm run build
         env:
-<<<<<<< HEAD
-          VITE_PAGES_BASE: /${{ github.event.repository.name }}/
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-      - name: Build employee order console
-        run: npm run build --prefix staff/order-console
-        env:
-          VITE_PAGES_BASE: /${{ github.event.repository.name }}/order/
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-=======
           VITE_PAGES_BASE: ./
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || vars.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY || vars.SUPABASE_PUBLISHABLE_KEY || vars.SUPABASE_ANON_KEY }}
       - name: Build employee order console
         run: npm run build --prefix staff/order-console
         env:
           VITE_PAGES_BASE: ./
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY }}
->>>>>>> temp-branch
-          VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || vars.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY || vars.SUPABASE_PUBLISHABLE_KEY || vars.SUPABASE_ANON_KEY }}
+          VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL || vars.STAFF_EMAIL }}
       - name: Build development dashboard
         run: npm run build --prefix staff/development-dashboard
         env:
-<<<<<<< HEAD
-          VITE_PAGES_BASE: /${{ github.event.repository.name }}/dev/
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-=======
           VITE_PAGES_BASE: ./
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY }}
->>>>>>> temp-branch
-          VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || vars.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY || vars.SUPABASE_PUBLISHABLE_KEY || vars.SUPABASE_ANON_KEY }}
+          VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL || vars.STAFF_EMAIL }}
       - name: Assemble Pages site
         run: |
           mkdir -p _site/order _site/dev

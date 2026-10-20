@@ -10,11 +10,7 @@ const __dirname = path.dirname(__filename);
 
 // https://vite.dev/config/
 export default defineConfig({
-<<<<<<< HEAD
-  base: process.env.VITE_PAGES_BASE ?? '/',
-=======
   base: process.env.VITE_PAGES_BASE ?? './',
->>>>>>> temp-branch
   plugins: [react(), tailwindcss(), viteSingleFile()],
   resolve: {
     alias: {
