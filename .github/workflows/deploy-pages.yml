@@ -20,6 +20,10 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -30,6 +34,11 @@ jobs:
           cache: npm
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+      - name: Validate repository variables
+        run: |
+          test -n "$VITE_SUPABASE_URL" || { echo "::error::Missing repository variable: VITE_SUPABASE_URL"; exit 1; }
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" || { echo "::error::Missing repository variable: VITE_SUPABASE_PUBLISHABLE_KEY"; exit 1; }
+          test -n "$VITE_STAFF_EMAIL" || { echo "::error::Missing repository variable: VITE_STAFF_EMAIL"; exit 1; }
       - name: Install dependencies
         run: |
           npm ci
@@ -39,22 +48,35 @@ jobs:
         run: npm run build
         env:
           VITE_PAGES_BASE: ./
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || vars.SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY || vars.SUPABASE_PUBLISHABLE_KEY || vars.SUPABASE_ANON_KEY }}
       - name: Build employee order console
         run: npm run build --prefix staff/order-console
         env:
           VITE_PAGES_BASE: ./
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || vars.SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY || vars.SUPABASE_PUBLISHABLE_KEY || vars.SUPABASE_ANON_KEY }}
-          VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL || vars.STAFF_EMAIL }}
       - name: Build development dashboard
         run: npm run build --prefix staff/development-dashboard
         env:
           VITE_PAGES_BASE: ./
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || vars.SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY || vars.SUPABASE_PUBLISHABLE_KEY || vars.SUPABASE_ANON_KEY }}
-          VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL || vars.STAFF_EMAIL }}
+      - name: Verify production configuration and page assets
+        run: |
+          if grep -n -E '^(<<<<<<<|=======|>>>>>>>)' dist/index.html staff/order-console/dist/index.html staff/development-dashboard/dist/index.html; then
+            echo "::error::A built page contains unresolved merge-conflict markers"
+            exit 1
+          fi
+          grep -R -Fq -- "$VITE_SUPABASE_URL" dist
+          grep -R -Fq -- "$VITE_SUPABASE_PUBLISHABLE_KEY" dist
+          grep -R -Fq -- "$VITE_SUPABASE_URL" staff/order-console/dist
+          grep -R -Fq -- "$VITE_SUPABASE_PUBLISHABLE_KEY" staff/order-console/dist
+          grep -R -Fq -- "$VITE_STAFF_EMAIL" staff/order-console/dist
+          grep -R -Fq -- "$VITE_SUPABASE_URL" staff/development-dashboard/dist
+          grep -R -Fq -- "$VITE_SUPABASE_PUBLISHABLE_KEY" staff/development-dashboard/dist
+          grep -R -Fq -- "$VITE_STAFF_EMAIL" staff/development-dashboard/dist
+          test -f dist/index.html
+          test -f staff/order-console/dist/index.html
+          test -f staff/development-dashboard/dist/index.html
+          grep -q 'src="./assets/' staff/order-console/dist/index.html
+          grep -q 'href="./assets/' staff/order-console/dist/index.html
+          grep -q 'src="./assets/' staff/development-dashboard/dist/index.html
+          grep -q 'href="./assets/' staff/development-dashboard/dist/index.html
       - name: Assemble Pages site
         run: |
           mkdir -p _site/order _site/dev
