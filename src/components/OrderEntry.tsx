@@ -119,7 +119,7 @@ export function OrderEntry({ deviceNo, menu, loading, connected, menuError, back
         {page === 0 ? <>
           <div className="orderIntro"><span className="orderEyebrow">A LITTLE TASTE OF SPACE</span><h1>먼저, 탑승자 정보를<br/>알려주세요.</h1><p>주문표에 이름과 별자리가 표시돼요.</p></div>
           <div className="orderInfoGrid"><label className="nameField"><span>이름</span><input autoComplete="name" maxLength={30} placeholder="이름을 입력해 주세요" value={name} onChange={(event) => setName(event.target.value)}/></label>
-          <div className="birthdayBlock"><div className="birthdayTitle"><div><b>생년월일</b><span>마우스 휠 · ↑↓ 방향키 · 클릭으로 선택해요 (페이지 키: 10칸)</span></div><Sparkles size={18}/></div>
+          <div className="birthdayBlock"><div className="birthdayTitle"><div><b>생년월일</b></div><Sparkles size={18}/></div>
             <div className="birthdayWheels"><WheelColumn label="연도" items={dateItems.years} value={year} onChange={setYear}/><WheelColumn label="월" items={dateItems.months} value={month} onChange={setMonth}/><WheelColumn label="일" items={dateItems.days} value={day} onChange={setDay}/></div>
             <p className="birthdayPreview">{validInfo ? `${year}년 ${month}월 ${day}일` : '연도 · 월 · 일을 각각 선택해 주세요'}</p>
           </div></div>
