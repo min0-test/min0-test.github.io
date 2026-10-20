@@ -38,20 +38,20 @@ jobs:
       - name: Build game
         run: npm run build
         env:
-          VITE_PAGES_BASE: /
+          VITE_PAGES_BASE: ./
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - name: Build employee order console
         run: npm run build --prefix staff/order-console
         env:
-          VITE_PAGES_BASE: /order/
+          VITE_PAGES_BASE: ./
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
       - name: Build development dashboard
         run: npm run build --prefix staff/development-dashboard
         env:
-          VITE_PAGES_BASE: /dev/
+          VITE_PAGES_BASE: ./
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
