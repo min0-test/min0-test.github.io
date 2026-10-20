@@ -1,0 +1,1 @@
+{"extends":"../../tsconfig.json","compilerOptions":{"baseUrl":".","paths":{"@orders":["../../src/orders/client.ts"]}},"include":["src","vite.config.ts"]}

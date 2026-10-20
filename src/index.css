@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+html, body, #root { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #05030f; }
+body { font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; }
+* { box-sizing: border-box; }
+.no-pe { pointer-events: none; }
+
+@keyframes twinkle { 0%,100% { opacity: .25 } 50% { opacity: 1 } }
+@keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+@keyframes bob { 0%,100% { transform: translateY(0) rotate(-1.5deg) } 50% { transform: translateY(-6px) rotate(1.5deg) } }
+@keyframes spin { to { transform: rotate(360deg) } }
+@keyframes pulse { 0%,100% { transform: scale(1) } 50% { transform: scale(1.08) } }
+@keyframes pop { 0% { transform: scale(0) } 70% { transform: scale(1.15) } 100% { transform: scale(1) } }
+@keyframes wobble { 0%,100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
+@keyframes spark { 0%,100% { opacity: 1; transform: scale(1) } 50% { opacity: .4; transform: scale(1.3) } }
+@keyframes banner { 0% { transform: translate(-50%, -40px) scale(.6); opacity: 0 } 12% { transform: translate(-50%, 0) scale(1.1); opacity: 1 } 20% { transform: translate(-50%,0) scale(1) } 85% { opacity: 1 } 100% { transform: translate(-50%, -20px) scale(1); opacity: 0 } }
+@keyframes nebula { 0%,100% { transform: translate(0,0) scale(1) } 50% { transform: translate(-30px, 15px) scale(1.1) } }
+@keyframes hueflow { to { filter: hue-rotate(360deg) } }
+@keyframes blink { 0%,92%,100% { transform: scaleY(1) } 95% { transform: scaleY(.1) } }
+@keyframes pointer { 0%,100% { transform: translate(0,0) } 50% { transform: translate(10px, 10px) } }
+.anim-twinkle { animation: twinkle 3s ease-in-out infinite; }
+.anim-floaty { animation: floaty 3s ease-in-out infinite; }
+.anim-bob { animation: bob 2.4s ease-in-out infinite; }
+.anim-spin { animation: spin 6s linear infinite; }
+.anim-pulse { animation: pulse 1.2s ease-in-out infinite; }
+.anim-pop { animation: pop .35s ease-out both; }
+.anim-wobble { animation: wobble .5s ease-in-out infinite; }
+.anim-spark { animation: spark .3s linear infinite; }
+.anim-blink { animation: blink 4s infinite; transform-origin: center; transform-box: fill-box; }
+.anim-pointer { animation: pointer .9s ease-in-out infinite; }
+@keyframes gravity-ui-drift {
+  0%,100% { translate: 0 0; rotate: 0deg }
+  25% { translate: var(--gx) var(--gy); rotate: var(--gr) }
+  50% { translate: 0 0; rotate: 0deg }
+  75% { translate: var(--gnx) var(--gny); rotate: var(--gnr) }
+}
+.gravity-ui > * { --gx: 9px; --gy: -13px; --gnx: -9px; --gny: 13px; --gr: 1.5deg; --gnr: -1.5deg; --gd: 1.5s; transition: translate .7s ease-out, rotate .7s ease-out; }
+.gravity-ui-active > * { animation: gravity-ui-drift var(--gd) linear infinite; }
+.gravity-ui-active > *:nth-child(2n) { --gx: -15px; --gy: -5px; --gnx: 15px; --gny: 5px; --gr: -2deg; --gnr: 2deg; --gd: 1.9s; }
+.gravity-ui-active > *:nth-child(3n) { --gx: 5px; --gy: 19px; --gnx: -5px; --gny: -19px; --gr: 1deg; --gnr: -1deg; --gd: 1.2s; }
+.gravity-ui-active > *:nth-child(4n) { --gx: 20px; --gy: 9px; --gnx: -20px; --gny: -9px; --gr: -2.5deg; --gnr: 2.5deg; --gd: 2.2s; }
+@keyframes tutorial-skip-fill { from { width: 0 } to { width: 100% } }
+.btn3d { transition: transform .08s; }
+.btn3d:hover { transform: translateY(-2px) scale(1.03); }
+.btn3d:active { transform: translateY(2px) scale(.97); }
