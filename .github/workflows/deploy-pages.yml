@@ -40,20 +40,20 @@ jobs:
         env:
           VITE_PAGES_BASE: ./
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY }}
       - name: Build employee order console
         run: npm run build --prefix staff/order-console
         env:
           VITE_PAGES_BASE: ./
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY }}
           VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
       - name: Build development dashboard
         run: npm run build --prefix staff/development-dashboard
         env:
           VITE_PAGES_BASE: ./
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_ANON_KEY }}
           VITE_STAFF_EMAIL: ${{ vars.VITE_STAFF_EMAIL }}
       - name: Assemble Pages site
         run: |
