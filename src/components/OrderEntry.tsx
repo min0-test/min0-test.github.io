@@ -33,7 +33,8 @@ function WheelColumn({ label, items, value, onChange }: { label: string; items: 
   }, [activeIndex, items.length]);
   const onWheel = (event: WheelEvent) => {
     event.preventDefault();
-    const delta = event.deltaY * (event.deltaMode === 1 ? ROW_HEIGHT : event.deltaMode === 2 ? event.currentTarget.clientHeight : 1);
+    const pageHeight = (event.currentTarget as HTMLElement | null)?.clientHeight ?? ROW_HEIGHT;
+    const delta = event.deltaY * (event.deltaMode === 1 ? ROW_HEIGHT : event.deltaMode === 2 ? pageHeight : 1);
     wheelDelta.current += delta;
     if (wheelTimer.current !== null) clearTimeout(wheelTimer.current);
     wheelTimer.current = window.setTimeout(() => { wheelDelta.current = 0; }, 110);

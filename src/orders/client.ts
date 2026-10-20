@@ -19,6 +19,14 @@ export type DrinkOrder = {
 };
 export type GuestOrder = { id: string; queue_no: number; created_at: string; device_no: number; status: OrderStatus };
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function requireDeviceNumber(value: number) {
+  if (!Number.isSafeInteger(value) || value < 1 || value > 9999) throw new Error('기기 번호를 확인해 주세요.');
+}
+function requireOrderId(value: string) {
+  if (!UUID_PATTERN.test(value)) throw new Error('주문 정보를 확인해 주세요.');
+}
+
 export function getSupabaseErrorMessage(error: unknown): string {
   const value = error && typeof error === 'object' ? error as { code?: string; message?: string } : undefined;
   const message = value?.message?.trim();
@@ -31,11 +39,14 @@ export function getSupabaseErrorMessage(error: unknown): string {
   if (/failed to fetch|networkerror|load failed/i.test(message ?? '')) {
     return 'Supabase 서버에 연결하지 못했습니다. 네트워크와 Supabase URL을 확인해 주세요.';
   }
-  return message || 'Supabase 요청에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+  if (value?.code === '23505') return '이 기기에는 아직 완료되지 않은 주문이 있습니다.';
+  if (value?.code === '22023') return message?.includes('생년월일') ? '생년월일을 확인해 주세요.' : '주문 정보를 확인해 주세요.';
+  return 'Supabase 요청에 실패했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
 export async function getDeviceOrder(deviceNo: number): Promise<GuestOrder | null> {
   if (!supabase) return null;
+  requireDeviceNumber(deviceNo);
   const { data, error } = await supabase.rpc('get_device_order', { p_device_no: deviceNo });
   if (error) throw error;
   return ((data ?? []) as GuestOrder[])[0] ?? null;
@@ -43,6 +54,7 @@ export async function getDeviceOrder(deviceNo: number): Promise<GuestOrder | nul
 
 export async function getGuestOrderStatus(orderId: string): Promise<OrderStatus | null> {
   if (!supabase) return null;
+  requireOrderId(orderId);
   const { data, error } = await supabase.rpc('get_guest_order_status', { p_order_id: orderId });
   if (error) throw error;
   return data as OrderStatus | null;
@@ -50,8 +62,19 @@ export async function getGuestOrderStatus(orderId: string): Promise<OrderStatus 
 
 export async function createGuestOrder(input: { customerName: string; birthdate: string; menuId: string; deviceNo: number }): Promise<GuestOrder> {
   if (!supabase) throw new Error('Supabase 연결을 확인해 주세요.');
+  const customerName = input.customerName.normalize('NFC').trim();
+  if ([...customerName].length < 1 || [...customerName].length > 30 || /[\u0000-\u001f\u007f]/.test(customerName)) {
+    throw new Error('이름은 1~30자로 입력해 주세요.');
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.birthdate)) throw new Error('생년월일을 확인해 주세요.');
+  const date = new Date(`${input.birthdate}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== input.birthdate || date > new Date(new Date().toISOString().slice(0, 10))) {
+    throw new Error('생년월일을 확인해 주세요.');
+  }
+  requireOrderId(input.menuId);
+  requireDeviceNumber(input.deviceNo);
   const { data, error } = await supabase.rpc('create_guest_order', {
-    p_customer_name: input.customerName, p_customer_birthdate: input.birthdate,
+    p_customer_name: customerName, p_customer_birthdate: input.birthdate,
     p_menu_id: input.menuId, p_device_no: input.deviceNo,
   });
   if (error) throw new Error(getSupabaseErrorMessage(error));
@@ -69,7 +92,7 @@ export function subscribeOrders(onChange: () => void) {
 }
 export async function fetchMenu(): Promise<MenuItem[]> {
   if (!supabase) return DRINKS.map((name, position) => ({ id: `demo-${position}`, name, available: true, position }));
-  const { data, error } = await supabase.from('menu').select('*').order('position');
+  const { data, error } = await supabase.from('menu').select('id,name,available,position').order('position');
   if (error) throw error;
   return (data ?? []) as MenuItem[];
 }

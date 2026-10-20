@@ -148,10 +148,11 @@ function pullStockToBreach(g: Game, ing: string) {
 function banner(g: Game, icon: string, t: string, color = '#f43f5e') { g.banner = { icon, text: t, t: 2.6, color }; }
 
 // ---------- day flow ----------
-export function startGame(g: Game) {
+export function startGame(g: Game, { tutorial = true }: { tutorial?: boolean } = {}) {
   Object.assign(g, newGame(), { phase: 'play', flybys: g.flybys, time: g.time });
-  g.tut = 0;
-  spawnCustomer(g, 0, ORDERS[0], true);
+  g.tut = tutorial ? 0 : -1;
+  if (tutorial) spawnCustomer(g, 0, ORDERS[0], true);
+  else spawnCustomer(g, 0);
   sfx.day();
 }
 export function startDay(g: Game) {

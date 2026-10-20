@@ -37,7 +37,7 @@ export default function App() {
       setMenuError('');
     }).catch((e: unknown) => {
       console.error('Menu load failed', e);
-      setMenuError(e instanceof Error ? e.message : '메뉴를 불러오지 못했습니다.');
+      setMenuError(getSupabaseErrorMessage(e));
     });
     const orderTask = supabase ? getDeviceOrder(deviceNo).then((next) => {
       setOrderSyncError('');
@@ -168,12 +168,12 @@ export default function App() {
   const nextTut = () => { if (g.tut >= TUT_STEPS.length - 1) finishTutorial(); else g.tut++; };
   const skipTut = finishTutorial;
   const replayIfStillQueued = async () => {
-    if (!supabase || !deviceOrder) { setRetryError(''); startGame(g); return; }
+    if (!supabase || !deviceOrder) { setRetryError(''); startGame(g, { tutorial: false }); return; }
     const status = await getGuestOrderStatus(deviceOrder.id);
     if (!status) { setRetryError('주문 상태를 확인할 수 없습니다. 잠시 후 다시 눌러 주세요.'); return; }
     setRetryError('');
     setDeviceOrder({ ...deviceOrder, status });
-    if (status === 'queued') startGame(g);
+    if (status === 'queued') startGame(g, { tutorial: false });
     else if (status === 'picked_up') { Object.assign(g, newGame()); setFrame((f) => f + 1); }
   };
 

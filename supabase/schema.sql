@@ -44,8 +44,8 @@ do $$ begin
 exception when duplicate_object then null;
 end $$;
 
--- Public kiosks may read available menu items, but only authenticated staff can
--- read or change order records directly. Guest actions use narrow RPC results.
+-- Public kiosks may read available menu items, while any authenticated user
+-- may manage menu/order records. Guest actions use narrow RPC results.
 alter table public.menu enable row level security;
 alter table public.orders enable row level security;
 
@@ -62,7 +62,7 @@ create policy "staff can manage orders" on public.orders
   for all to authenticated using (auth.uid() is not null) with check (auth.uid() is not null);
 
 revoke all on public.menu, public.orders from anon;
-grant select on public.menu to anon;
+grant select (id, name, available, position) on public.menu to anon;
 grant select, insert, update, delete on public.menu, public.orders to authenticated;
 grant usage on schema public to anon, authenticated;
 
@@ -80,14 +80,25 @@ as $$
 declare
   new_order public.orders;
 begin
-  if char_length(trim(p_customer_name)) not between 1 and 30 then
-    raise exception '이름을 1~30자로 입력해 주세요.';
+  if p_customer_name is null or p_customer_name <> trim(p_customer_name)
+     or char_length(trim(p_customer_name)) not between 1 and 30
+     or p_customer_name ~ '[[:cntrl:]]' then
+    raise exception '이름은 1~30자로 입력해 주세요.' using errcode = '22023';
   end if;
-  if p_customer_birthdate > current_date then
-    raise exception '생년월일을 확인해 주세요.';
+  if p_customer_birthdate is null or p_customer_birthdate > current_date or p_customer_birthdate < date '1920-01-01' then
+    raise exception '생년월일을 확인해 주세요.' using errcode = '22023';
   end if;
-  if p_device_no not between 1 and 9999 then
-    raise exception '기기 번호를 확인해 주세요.';
+  if p_device_no is null or p_device_no not between 1 and 9999 or p_menu_id is null then
+    raise exception '주문 정보를 확인해 주세요.' using errcode = '22023';
+  end if;
+
+  -- Serialize requests from the same kiosk and prevent duplicate active orders.
+  perform pg_catalog.pg_advisory_xact_lock(p_device_no);
+  if exists (
+    select 1 from public.orders as active_order
+    where active_order.device_no = p_device_no and active_order.status in ('queued', 'ready')
+  ) then
+    raise exception '이 기기에는 아직 완료되지 않은 주문이 있습니다.' using errcode = '23505';
   end if;
 
   insert into public.orders (customer_name, customer_birthdate, menu_id, device_no, status)
