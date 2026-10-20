@@ -7,7 +7,7 @@ import { SpaceBg, CafeRoom, Musk, CustomerView, Spots, MeteorView } from './comp
 import { Counter, type Api } from './components/Counter';
 import { HUD, FX, Weather, Banner, Tutorial, DragGhost, DisasterAlerts, DebugPanel } from './components/Overlay';
 import { DayEnd, GameOver } from './components/Screens';
-import { supabase, fetchMenu, getDeviceOrder, getGuestOrderStatus, createGuestOrder, subscribeOrders, type MenuItem, type GuestOrder } from './orders/client';
+import { supabase, fetchMenu, getDeviceOrder, getGuestOrderStatus, createGuestOrder, getSupabaseErrorMessage, subscribeOrders, type MenuItem, type GuestOrder } from './orders/client';
 import { OrderEntry } from './components/OrderEntry';
 
 function readDeviceNumber() {
@@ -27,6 +27,7 @@ export default function App() {
   const [orderLoading, setOrderLoading] = useState(true);
   const [retryError, setRetryError] = useState('');
   const [menuError, setMenuError] = useState('');
+  const [orderSyncError, setOrderSyncError] = useState('');
   const scaleRef = useRef(1);
   const stageRef = useRef<HTMLDivElement>(null);
 
@@ -39,6 +40,7 @@ export default function App() {
       setMenuError(e instanceof Error ? e.message : '메뉴를 불러오지 못했습니다.');
     });
     const orderTask = supabase ? getDeviceOrder(deviceNo).then((next) => {
+      setOrderSyncError('');
       const resumed = g.phase === 'title' && (next?.status === 'queued' || next?.status === 'ready');
       if (g.phase === 'title' && next?.status === 'queued') startGame(g);
       else if (g.phase === 'title' && next?.status === 'ready') g.phase = 'over';
@@ -46,6 +48,7 @@ export default function App() {
       if (resumed) setFrame((f) => f + 1);
     }).catch((e: unknown) => {
       console.error('Device order sync failed', e);
+      setOrderSyncError(getSupabaseErrorMessage(e));
     }) : Promise.resolve();
     await Promise.all([menuTask, orderTask]);
     setOrderLoading(false);
@@ -210,12 +213,12 @@ export default function App() {
           ? <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#09051ceF] text-center text-white"><div className="text-[100px]">🥤</div><div className="text-[54px] font-black">음료가 준비됐어요!</div><div className="mt-4 rounded-3xl border-4 border-white/80 bg-violet-950/70 px-10 py-6 text-[30px] font-black">기기 번호 <span className="text-yellow-300">{deviceNo}</span>번에서 수령해 주세요</div><div className="mt-5 text-[20px] font-bold text-violet-200">직원에게 이름을 확인하고 음료를 받아 주세요</div><div className="mt-3 text-[15px] text-violet-300/80">수령이 확인되면 새 주문 화면으로 돌아갑니다</div></div>
           : <GameOver g={g} message={retryError} onRetry={() => { void replayIfStillQueued(); }} />)}
       </div>
-      {g.phase === 'title' && createPortal(<OrderEntry deviceNo={deviceNo} menu={menu} loading={orderLoading} connected={!!supabase} menuError={menuError} onPlayWithoutOrder={() => { setDeviceOrder(null); setRetryError(''); startGame(g); }} onSubmit={async (customerName, birthdate, menuId) => {
+      {g.phase === 'title' && createPortal(<OrderEntry deviceNo={deviceNo} menu={menu} loading={orderLoading} connected={!!supabase} menuError={menuError} backendError={orderSyncError} onPlayWithoutOrder={() => { setDeviceOrder(null); setRetryError(''); startGame(g); }} onSubmit={async (customerName, birthdate, menuId) => {
         if (!supabase) return 'Supabase 연결을 확인해 주세요.';
         try {
           const data = await createGuestOrder({ customerName: customerName.trim(), birthdate, menuId, deviceNo });
           setRetryError(''); setDeviceOrder(data); startGame(g); return '';
-        } catch (error) { return error instanceof Error ? error.message : '주문을 접수하지 못했습니다.'; }
+        } catch (error) { return getSupabaseErrorMessage(error); }
       }} />, document.body)}
     </div>
   );

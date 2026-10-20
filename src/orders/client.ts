@@ -19,6 +19,21 @@ export type DrinkOrder = {
 };
 export type GuestOrder = { id: string; queue_no: number; created_at: string; device_no: number; status: OrderStatus };
 
+export function getSupabaseErrorMessage(error: unknown): string {
+  const value = error && typeof error === 'object' ? error as { code?: string; message?: string } : undefined;
+  const message = value?.message?.trim();
+  if (value?.code === 'PGRST202' || value?.code === '42883' || /could not find the function|schema cache|function .* does not exist/i.test(message ?? '')) {
+    return 'Supabase 주문 기능이 데이터베이스에 반영되지 않았습니다. Supabase SQL Editor에서 저장소의 supabase/schema.sql을 실행해 주세요.';
+  }
+  if (value?.code === '42501' || /permission denied|not authorized|insufficient privilege/i.test(message ?? '')) {
+    return 'Supabase 주문 권한이 설정되지 않았습니다. supabase/schema.sql의 권한과 정책을 적용했는지 확인해 주세요.';
+  }
+  if (/failed to fetch|networkerror|load failed/i.test(message ?? '')) {
+    return 'Supabase 서버에 연결하지 못했습니다. 네트워크와 Supabase URL을 확인해 주세요.';
+  }
+  return message || 'Supabase 요청에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+}
+
 export async function getDeviceOrder(deviceNo: number): Promise<GuestOrder | null> {
   if (!supabase) return null;
   const { data, error } = await supabase.rpc('get_device_order', { p_device_no: deviceNo });
@@ -39,7 +54,7 @@ export async function createGuestOrder(input: { customerName: string; birthdate:
     p_customer_name: input.customerName, p_customer_birthdate: input.birthdate,
     p_menu_id: input.menuId, p_device_no: input.deviceNo,
   });
-  if (error) throw error;
+  if (error) throw new Error(getSupabaseErrorMessage(error));
   const order = ((data ?? []) as GuestOrder[])[0];
   if (!order) throw new Error('주문을 생성하지 못했습니다.');
   return order;

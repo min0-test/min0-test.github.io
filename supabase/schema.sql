@@ -64,6 +64,7 @@ create policy "staff can manage orders" on public.orders
 revoke all on public.menu, public.orders from anon;
 grant select on public.menu to anon;
 grant select, insert, update, delete on public.menu, public.orders to authenticated;
+grant usage on schema public to anon, authenticated;
 
 create or replace function public.create_guest_order(
   p_customer_name text,
@@ -133,3 +134,5 @@ revoke all on function public.get_guest_order_status(uuid) from public;
 grant execute on function public.create_guest_order(text, date, uuid, integer) to anon, authenticated;
 grant execute on function public.get_device_order(integer) to anon, authenticated;
 grant execute on function public.get_guest_order_status(uuid) to anon, authenticated;
+
+notify pgrst, 'reload schema';
