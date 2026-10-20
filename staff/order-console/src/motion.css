@@ -1,0 +1,9 @@
+/* Keep brief interface feedback visible when the OS requests reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .appShell { animation: appArrive .24s ease both !important; }
+  .ordersView, .menuView { animation: sectionArrive .22s ease both !important; }
+  .ticket, .menuRow { animation: rowArrive .22s ease both !important; }
+  .ticket.priority { animation: rowArrive .22s ease both !important; }
+  .bottomNav button.active svg { animation: tabPop .2s ease both !important; transition: transform .16s ease !important; }
+  .ticket, .bottomNav button, .addButton, .menuActions button, .saveIcon { transition-duration: .16s !important; }
+}

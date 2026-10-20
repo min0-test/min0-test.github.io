@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type WheelEvent, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { Coffee, LoaderCircle, Sparkles, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import type { MenuItem } from '../orders/client';
 import './OrderEntry.css';
@@ -13,37 +13,60 @@ function WheelColumn({ label, items, value, onChange }: { label: string; items: 
   const wheelDelta = useRef(0);
   const wheelTimer = useRef<number | null>(null);
   const skipNextSync = useRef(false);
+  const wheelTargetIndex = useRef(0);
+  const programmaticScrollUntil = useRef(0);
+  const initialized = useRef(false);
   const activeIndex = Math.max(0, items.findIndex((item) => item.value === value));
   useEffect(() => {
-    if (skipNextSync.current) skipNextSync.current = false;
-    else if (list.current && !window.matchMedia('(min-width: 900px)').matches) list.current.scrollTo({ top: activeIndex * ROW_HEIGHT, behavior: 'smooth' });
+    wheelTargetIndex.current = activeIndex;
+    if (list.current) {
+      if (!initialized.current) {
+        list.current.scrollTop = activeIndex * ROW_HEIGHT;
+        initialized.current = true;
+      } else if (skipNextSync.current) skipNextSync.current = false;
+      else {
+        programmaticScrollUntil.current = Date.now() + 360;
+        list.current.scrollTo({ top: activeIndex * ROW_HEIGHT, behavior: 'smooth' });
+      }
+    }
     return () => { if (settleTimer.current !== null) clearTimeout(settleTimer.current); if (wheelTimer.current !== null) clearTimeout(wheelTimer.current); };
   }, [activeIndex, items.length]);
-  const onWheel = (event: WheelEvent<HTMLDivElement>) => {
+  const onWheel = (event: WheelEvent) => {
     event.preventDefault();
-    wheelDelta.current += event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1);
+    const delta = event.deltaY * (event.deltaMode === 1 ? ROW_HEIGHT : event.deltaMode === 2 ? event.currentTarget.clientHeight : 1);
+    wheelDelta.current += delta;
     if (wheelTimer.current !== null) clearTimeout(wheelTimer.current);
-    wheelTimer.current = window.setTimeout(() => { wheelDelta.current = 0; }, 140);
+    wheelTimer.current = window.setTimeout(() => { wheelDelta.current = 0; }, 110);
     if (Math.abs(wheelDelta.current) >= 28) {
       const magnitude = Math.abs(wheelDelta.current);
-      // Standard desktop mouse wheels report about 100px per notch. Keep one
-      // notch to one date step while still supporting trackpads.
-      const steps = Math.min(4, Math.max(1, Math.round(magnitude / 100)));
+      const steps = Math.min(7, Math.max(1, Math.round(magnitude / 64)));
       const step = (wheelDelta.current > 0 ? 1 : -1) * steps;
-      const next = Math.max(0, Math.min(items.length - 1, activeIndex + step));
+      const next = Math.max(0, Math.min(items.length - 1, wheelTargetIndex.current + step));
       wheelDelta.current = 0;
-      if (items[next] && next !== activeIndex) {
+      if (items[next] && next !== wheelTargetIndex.current) {
+        wheelTargetIndex.current = next;
+        programmaticScrollUntil.current = Date.now() + 360;
         onChange(items[next].value);
       }
     }
   };
+  useEffect(() => {
+    const element = list.current;
+    if (!element) return;
+    element.addEventListener('wheel', onWheel, { passive: false });
+    return () => element.removeEventListener('wheel', onWheel);
+  }, [onWheel]);
   const onScroll = () => {
     if (settleTimer.current !== null) clearTimeout(settleTimer.current);
     settleTimer.current = window.setTimeout(() => {
-      if (!list.current) return;
+      if (!list.current || Date.now() < programmaticScrollUntil.current) return;
       const index = Math.max(0, Math.min(items.length - 1, Math.round(list.current.scrollTop / ROW_HEIGHT)));
-      if (items[index] && items[index].value !== value) { skipNextSync.current = true; onChange(items[index].value); }
-    }, 65);
+      if (items[index] && index !== wheelTargetIndex.current) {
+        wheelTargetIndex.current = index;
+        skipNextSync.current = true;
+        onChange(items[index].value);
+      }
+    }, 110);
   };
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const step = event.key === 'PageUp' || event.key === 'PageDown' ? 10 : 1;
@@ -58,10 +81,10 @@ function WheelColumn({ label, items, value, onChange }: { label: string; items: 
     if (next !== activeIndex && items[next]) onChange(items[next].value);
   };
   const select = (item: WheelItem, index: number) => {
+    wheelTargetIndex.current = index;
     onChange(item.value);
-    if (!window.matchMedia('(min-width: 900px)').matches) list.current?.scrollTo({ top: index * ROW_HEIGHT, behavior: 'smooth' });
   };
-  return <div className="wheelColumn"><span className="wheelLabel">{label}</span><div className="wheelFrame"><div className="wheelSelection"/><div ref={list} className="wheelList" role="listbox" tabIndex={0} aria-label={label} aria-activedescendant={`wheel-${label}-${value}`} onKeyDown={onKeyDown} onScroll={onScroll} onWheel={onWheel}>
+  return <div className="wheelColumn"><span className="wheelLabel">{label}</span><div className="wheelFrame"><div className="wheelSelection"/><div ref={list} className="wheelList" role="listbox" tabIndex={0} aria-label={label} aria-activedescendant={`wheel-${label}-${value}`} onKeyDown={onKeyDown} onScroll={onScroll} onTouchStart={() => { programmaticScrollUntil.current = 0; }}>
     <div className="wheelOptions" style={{'--wheel-index':activeIndex} as CSSProperties}><div className="wheelSpacer"/>{items.map((item, index) => <div id={`wheel-${label}-${item.value}`} role="option" aria-selected={item.value === value} className={`wheelItem ${item.value === value ? 'selected' : ''}`} key={item.value} onClick={() => select(item, index)}>{item.label}</div>)}<div className="wheelSpacer"/></div>
   </div><span className="wheelFade top"/><span className="wheelFade bottom"/></div></div>;
 }

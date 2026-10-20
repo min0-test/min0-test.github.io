@@ -26,3 +26,24 @@
 @media(min-width:900px){.wheelOptions{transform:translateY(calc(var(--wheel-index) * -48px));transition:transform .24s cubic-bezier(.2,.72,.25,1)}.wheelList{scroll-behavior:auto}}
 @media(prefers-reduced-motion:reduce){.wheelOptions{transition:none!important}}
 @keyframes slideForwardSmooth{from{opacity:0;transform:translateX(38px);filter:blur(2px)}to{opacity:1;transform:translateX(0);filter:blur(0)}}@keyframes slideBackSmooth{from{opacity:0;transform:translateX(-38px);filter:blur(2px)}to{opacity:1;transform:translateX(0);filter:blur(0)}}
+
+/* Keep the selected row and its frame aligned at every breakpoint. */
+.orderExperience .wheelColumn{--wheel-center-pad:56px}
+.orderExperience .wheelSpacer{height:var(--wheel-center-pad)!important}
+.orderExperience .wheelSelection{top:var(--wheel-center-pad)!important}
+.orderExperience .wheelItem{display:flex;align-items:center;justify-content:center;line-height:1}
+.orderExperience .wheelList{overflow-y:auto!important;overflow-x:hidden;scroll-snap-type:y proximity;scroll-behavior:smooth!important}
+.orderExperience .wheelOptions{transform:none!important}
+@media(min-width:600px){.orderExperience .wheelColumn{--wheel-center-pad:65px}}
+@media(max-height:720px){.orderExperience .wheelColumn{--wheel-center-pad:42px}}
+@media(min-width:900px){.orderExperience .wheelColumn{--wheel-center-pad:78px}}
+@media(min-width:900px) and (max-height:900px){.orderExperience .wheelColumn{--wheel-center-pad:55px}}
+
+/* Honor reduced-motion preferences without making state changes imperceptible. */
+@media(prefers-reduced-motion:reduce){
+  .orderExperience .orderAmbient{animation:none!important}
+  .orderExperience .orderLayout{animation-duration:.24s!important}
+  .orderExperience .orderSlide{animation-duration:.22s!important}
+  .orderExperience .wheelItem.selected,.orderExperience .orderError{animation-duration:.18s!important}
+  .orderExperience .stepMeter span,.orderExperience .wheelItem,.orderExperience .drinkOption,.orderExperience .continueButton,.orderExperience .backButton,.orderExperience .nameField input{transition-duration:.18s!important}
+}

@@ -1,0 +1,9 @@
+/* Keep brief interface feedback visible when the OS requests reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .shell { animation: dashIn .24s ease both !important; }
+  .deviceCard, .card, .stat, .insightStrip article { animation: cardIn .22s ease both !important; }
+  .barRow > div i { animation: barIn .22s ease both !important; }
+  .orderRow { animation: rowIn .22s ease both !important; }
+  .refresh, .deviceCard button { transition: transform .16s ease, background-color .16s ease !important; }
+  .dailyCol i, .weekdayChart i, .hourChart i { transition-duration: .18s !important; }
+}
