@@ -362,6 +362,11 @@ function startDisaster(g: Game, type: DisasterType) {
 export function debugTriggerDisaster(g: Game, type: DisasterType) { startDisaster(g, type); }
 export function debugRestock(g: Game) { for (const ing of INGREDIENTS) if (ing.day <= g.day) g.stock[ing.id] += 10; }
 export function debugAddMoney(g: Game, amount = 1000) { g.money += amount; }
+export function debugReduceTimer(g: Game, seconds = 10) {
+  if (g.phase !== 'play') return;
+  g.dayTime = Math.min(g.dayLen, g.dayTime + Math.max(0, seconds));
+  if (g.dayTime >= g.dayLen) g.timerPaused = false;
+}
 function scheduleDisaster(g: Game) {
   const pool = (Object.keys(DISASTER_DAY) as DisasterType[]).filter((t) => DISASTER_DAY[t] <= g.day && !(t === 'flare' && g.flareT > 0) && !(t === 'rain' && g.rainT > 0) && !(t === 'supernova' && g.supernova > 0) && !(t === 'gravity' && g.gravityT !== 0) && !(t === 'blackout' && g.blackoutT > 0));
   if (!pool.length) return;

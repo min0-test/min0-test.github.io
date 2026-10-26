@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { Game, Special } from '../game/engine';
 import type { ParticleShape } from '../game/engine';
-import { TUT_STEPS, ingRect, L, machineBtn, tutActive, W, H, debugAddMoney, debugRestock, debugSpawnCustomer, debugTriggerDisaster } from '../game/engine';
+import { TUT_STEPS, ingRect, L, machineBtn, tutActive, W, H, debugAddMoney, debugRestock, debugReduceTimer, debugSpawnCustomer, debugTriggerDisaster } from '../game/engine';
 import { PlanetIcon, CupView, Mallet } from './Art';
 import { type DisasterType } from '../game/data';
 import { isMuted, setMuted } from '../game/audio';
@@ -166,6 +166,7 @@ export function DebugPanel({ g }: { g: Game }) {
       {[1, 2, 3, 4, 5].map((day) => <button key={day} className={button} onPointerDown={(e) => trigger(e, () => { g.day = day; })}>DAY {day}</button>)}
       <button className={button} onPointerDown={(e) => trigger(e, () => debugRestock(g))}>해금 재료 +10</button>
       <button className={button} onPointerDown={(e) => trigger(e, () => { g.timerPaused = !g.timerPaused; })}>{g.timerPaused ? '타이머 재개' : '타이머 정지'}</button>
+      <button className={button} onPointerDown={(e) => trigger(e, () => debugReduceTimer(g, 10))}>타이머 -10초</button>
       <button className={button} onPointerDown={(e) => trigger(e, () => debugAddMoney(g))}>돈 +$1,000</button>
     </div>
   </div>;
