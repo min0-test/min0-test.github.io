@@ -101,7 +101,13 @@ export function OrderEntry({ deviceNo, menu, loading, connected, menuError, back
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
   const [allowPlayWithoutOrder, setAllowPlayWithoutOrder] = useState(false);
-  const available = menu.filter((item) => item.available);
+  const available = menu;
+  useEffect(() => {
+    if (selected && menu.length && !menu.some((item) => item.id === selected && item.available)) {
+      setSelected('');
+      setError('선택한 메뉴가 품절되어 다른 메뉴를 골라 주세요.');
+    }
+  }, [menu, selected]);
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
@@ -131,7 +137,7 @@ export function OrderEntry({ deviceNo, menu, loading, connected, menuError, back
       setAllowPlayWithoutOrder(true);
     } finally { setSending(false); }
   };
-  const hasOrderMenu = connected && !menuError && available.length > 0;
+  const hasOrderMenu = connected && !menuError && available.some((item) => item.available);
   const playWithoutOrder = !loading && (!hasOrderMenu || allowPlayWithoutOrder);
   return <div className="orderExperience"><div className="orderAmbient ambientOne"/><div className="orderAmbient ambientTwo"/>
     <main className="orderLayout">
@@ -149,8 +155,8 @@ export function OrderEntry({ deviceNo, menu, loading, connected, menuError, back
           </div></div>
         </> : <>
           <div className="orderIntro"><span className="orderEyebrow">CHOOSE YOUR DRINK</span><h1>오늘은 어떤 맛으로<br/>여행할까요?</h1><p>마음에 드는 음료 하나를 골라주세요.</p></div>
-          <div className="drinkGrid">{available.map((item) => <button type="button" key={item.id} className={`drinkOption ${selected === item.id ? 'chosen' : ''}`} onClick={() => { setSelected(item.id); setError(''); setAllowPlayWithoutOrder(false); }}><span className="drinkEmoji">{['🍏','🥭','🍊','🍇','🌿','🍊','🍍','🍈','🍓','🍈','🍋','🫐'][menu.findIndex((m) => m.id === item.id) % 12]}</span><span>{item.name}</span>{selected === item.id && <Check className="drinkCheck" size={17}/>}</button>)}</div>
-          {!loading && available.length === 0 && <div className="emptyDrinks">{menuError || (connected ? '지금 주문할 수 있는 음료가 없어요.' : '메뉴를 불러오지 못했어요.')}</div>}
+          <div className="drinkGrid">{available.map((item) => <button type="button" key={item.id} disabled={!item.available} aria-label={`${item.name}${item.available ? '' : ', 품절'}`} className={`drinkOption ${selected === item.id ? 'chosen' : ''} ${!item.available ? 'soldOutDrink' : ''}`} onClick={() => { if (!item.available) return; setSelected(item.id); setError(''); setAllowPlayWithoutOrder(false); }}><span className="drinkEmoji">{item.emoji || '🥤'}</span><span>{item.name}</span>{item.available ? selected === item.id && <Check className="drinkCheck" size={17}/> : <span className="soldOutBadge">품절</span>}</button>)}</div>
+          {!loading && (available.length === 0 || !available.some((item) => item.available)) && <div className="emptyDrinks">{menuError || (connected ? '지금 주문할 수 있는 음료가 없어요.' : '메뉴를 불러오지 못했어요.')}</div>}
         </>}
       </section>
       {error && <div className="orderError" role="alert">{error}</div>}

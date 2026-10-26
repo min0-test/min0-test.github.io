@@ -47,3 +47,4 @@
   .orderExperience .wheelItem.selected,.orderExperience .orderError{animation-duration:.18s!important}
   .orderExperience .stepMeter span,.orderExperience .wheelItem,.orderExperience .drinkOption,.orderExperience .continueButton,.orderExperience .backButton,.orderExperience .nameField input{transition-duration:.18s!important}
 }
+.drinkOption.soldOutDrink{cursor:not-allowed;opacity:.52;filter:saturate(.55);border-style:dashed;background:#08061366}.drinkOption.soldOutDrink:active,.drinkOption.soldOutDrink:hover{transform:none;box-shadow:none;border-color:#ffffff1c;background:#08061366}.drinkOption.soldOutDrink .drinkEmoji{filter:grayscale(.5)}.soldOutBadge{position:absolute;right:8px;top:8px;padding:3px 6px;border:1px solid #fda4af44;border-radius:999px;background:#88133766;color:#fecdd3;font-size:9px;font-weight:750;letter-spacing:.2px}

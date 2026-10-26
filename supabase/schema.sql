@@ -3,6 +3,7 @@ create extension if not exists pgcrypto;
 create table if not exists public.menu (
   id uuid primary key default gen_random_uuid(),
   name text not null unique check (char_length(name) between 1 and 40),
+  emoji text not null default '🥤' check (char_length(emoji) between 1 and 16),
   available boolean not null default true,
   position integer not null default 0,
   created_at timestamptz not null default now(),
@@ -11,6 +12,23 @@ create table if not exists public.menu (
 
 -- Remove the former menu price field when upgrading an already initialized schema.
 alter table public.menu drop column if exists price;
+do $$ begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'menu' and column_name = 'emoji'
+  ) then
+    alter table public.menu add column emoji text not null default '🥤';
+    update public.menu set emoji = case position
+      when 0 then '🍏' when 1 then '🥭' when 2 then '🍊' when 3 then '🍇'
+      when 4 then '🌿' when 5 then '🍊' when 6 then '🍍' when 7 then '🍈'
+      when 8 then '🍓' when 9 then '🍈' when 10 then '🍋' when 11 then '🫐'
+      else '🥤' end;
+  end if;
+end $$;
+do $$ begin
+  alter table public.menu add constraint menu_emoji_length check (char_length(emoji) between 1 and 16);
+exception when duplicate_object then null;
+end $$;
 
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
@@ -30,9 +48,9 @@ create index if not exists orders_status_queue_idx on public.orders(status, queu
 create index if not exists orders_device_status_idx on public.orders(device_no, status, queue_no desc);
 create index if not exists orders_created_at_idx on public.orders(created_at desc);
 
-insert into public.menu (name, position) values
-  ('청사과',0),('망고',1),('자몽',2),('포도',3),('매실',4),('오렌지',5),
-  ('파인애플',6),('청포도',7),('딸기',8),('멜론',9),('레몬',10),('블루베리',11)
+insert into public.menu (name, position, emoji) values
+  ('청사과',0,'🍏'),('망고',1,'🥭'),('자몽',2,'🍊'),('포도',3,'🍇'),('매실',4,'🌿'),('오렌지',5,'🍊'),
+  ('파인애플',6,'🍍'),('청포도',7,'🍈'),('딸기',8,'🍓'),('멜론',9,'🍈'),('레몬',10,'🍋'),('블루베리',11,'🫐')
 on conflict (name) do nothing;
 
 do $$ begin
@@ -50,8 +68,9 @@ alter table public.menu enable row level security;
 alter table public.orders enable row level security;
 
 drop policy if exists "available menu is public" on public.menu;
-create policy "available menu is public" on public.menu
-  for select to anon using (available);
+drop policy if exists "menu is public" on public.menu;
+create policy "menu is public" on public.menu
+  for select to anon using (true);
 
 drop policy if exists "staff can manage menu" on public.menu;
 create policy "staff can manage menu" on public.menu
@@ -62,7 +81,7 @@ create policy "staff can manage orders" on public.orders
   for all to authenticated using (auth.uid() is not null) with check (auth.uid() is not null);
 
 revoke all on public.menu, public.orders from anon;
-grant select (id, name, available, position) on public.menu to anon;
+grant select (id, name, emoji, available, position) on public.menu to anon;
 grant select, insert, update, delete on public.menu, public.orders to authenticated;
 grant usage on schema public to anon, authenticated;
 

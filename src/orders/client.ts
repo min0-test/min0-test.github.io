@@ -11,7 +11,7 @@ export const supabase = url && key ? createClient(url, key, {
 
 export const DRINKS = ['청사과', '망고', '자몽', '포도', '매실', '오렌지', '파인애플', '청포도', '딸기', '멜론', '레몬', '블루베리'] as const;
 export type OrderStatus = 'queued' | 'ready' | 'picked_up';
-export type MenuItem = { id: string; name: string; available: boolean; position: number };
+export type MenuItem = { id: string; name: string; emoji: string; available: boolean; position: number };
 export type DrinkOrder = {
   id: string; queue_no: number; created_at: string; customer_name: string; customer_birthdate: string;
   menu_id: string; device_no: number; status: OrderStatus; completed_at: string | null;
@@ -90,9 +90,10 @@ export function subscribeOrders(onChange: () => void) {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'menu' }, onChange).subscribe();
   return () => { void supabase.removeChannel(ch); };
 }
+const DRINK_EMOJIS = ['🍏','🥭','🍊','🍇','🌿','🍊','🍍','🍈','🍓','🍈','🍋','🫐'] as const;
 export async function fetchMenu(): Promise<MenuItem[]> {
-  if (!supabase) return DRINKS.map((name, position) => ({ id: `demo-${position}`, name, available: true, position }));
-  const { data, error } = await supabase.from('menu').select('id,name,available,position').order('position');
+  if (!supabase) return DRINKS.map((name, position) => ({ id: `demo-${position}`, name, emoji: DRINK_EMOJIS[position] ?? '🥤', available: true, position }));
+  const { data, error } = await supabase.from('menu').select('id,name,emoji,available,position').order('position');
   if (error) throw error;
   return (data ?? []) as MenuItem[];
 }
