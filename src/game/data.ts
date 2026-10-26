@@ -12,15 +12,15 @@ export interface Ingredient {
 }
 
 export const INGREDIENTS: Ingredient[] = [
-  { id: 'earth', name: '지구', kind: 'base', color: '#3b82f6', color2: '#22c55e', temp: 0, day: 1, price: 10 },
-  { id: 'mars', name: '화성', kind: 'base', color: '#ef4444', color2: '#b45309', temp: 0, day: 1, price: 10 },
-  { id: 'venus', name: '금성', kind: 'base', color: '#facc15', color2: '#f97316', temp: 1, day: 1, price: 12 },
-  { id: 'neptune', name: '해왕성', kind: 'base', color: '#1e40af', color2: '#67e8f9', temp: -1, cold: true, day: 2, price: 14 },
-  { id: 'jupiter', name: '목성', kind: 'base', color: '#d97706', color2: '#fde68a', temp: 0, day: 3, price: 16 },
-  { id: 'ring', name: '토성 고리', kind: 'top', color: '#fcd34d', color2: '#a16207', temp: 0, day: 1, price: 8 },
-  { id: 'moondust', name: '달가루', kind: 'top', color: '#e5e7eb', color2: '#9ca3af', temp: 0, day: 1, price: 8 },
-  { id: 'comet', name: '혜성 얼음', kind: 'top', color: '#a5f3fc', color2: '#e0f2fe', temp: -1, cold: true, day: 2, price: 10 },
-  { id: 'asteroid', name: '소행성 크런치', kind: 'top', color: '#78716c', color2: '#44403c', temp: 0, day: 4, price: 12 },
+  { id: 'earth', name: '지구', kind: 'base', color: '#3b82f6', color2: '#22c55e', temp: 0, day: 1, price: 18 },
+  { id: 'mars', name: '화성', kind: 'base', color: '#ef4444', color2: '#b45309', temp: 0, day: 1, price: 18 },
+  { id: 'venus', name: '금성', kind: 'base', color: '#facc15', color2: '#f97316', temp: 1, day: 1, price: 22 },
+  { id: 'neptune', name: '해왕성', kind: 'base', color: '#1e40af', color2: '#67e8f9', temp: -1, cold: true, day: 2, price: 26 },
+  { id: 'jupiter', name: '목성', kind: 'base', color: '#d97706', color2: '#fde68a', temp: 0, day: 3, price: 30 },
+  { id: 'ring', name: '토성 고리', kind: 'top', color: '#fcd34d', color2: '#a16207', temp: 0, day: 1, price: 14 },
+  { id: 'moondust', name: '달가루', kind: 'top', color: '#e5e7eb', color2: '#9ca3af', temp: 0, day: 1, price: 14 },
+  { id: 'comet', name: '혜성 얼음', kind: 'top', color: '#a5f3fc', color2: '#e0f2fe', temp: -1, cold: true, day: 2, price: 18 },
+  { id: 'asteroid', name: '소행성 크런치', kind: 'top', color: '#78716c', color2: '#44403c', temp: 0, day: 4, price: 22 },
 ];
 export const ING = Object.fromEntries(INGREDIENTS.map((i) => [i.id, i])) as Record<string, Ingredient>;
 
@@ -147,8 +147,8 @@ export const LEAVE_LINES = ['너무 느려!!', '그냥 화성 갈래', '별점 �
 
 export interface Upgrade { id: string; name: string; icon: string; desc: string; cost: number[] }
 export const UPGRADES: Upgrade[] = [
-  { id: 'chair', name: '안마의자', icon: '💺', desc: '손님 인내심 +20%', cost: [60, 120, 220] },
-  { id: 'tip', name: '도지 팁통', icon: '🐕', desc: '수입 +15%', cost: [80, 160, 300] },
-  { id: 'heat', name: '골디락스 렌즈', icon: '🔭', desc: '가공 성공존 넓힘', cost: [50, 110] },
-  { id: 'shield', name: '운석 방패', icon: '🛡️', desc: '운석·고장 대응 쉬워짐', cost: [70, 150] },
+  { id: 'chair', name: '안마의자', icon: '💺', desc: '손님 인내심 +20%', cost: [100, 200, 360] },
+  { id: 'tip', name: '도지 팁통', icon: '🐕', desc: '수입 +15%', cost: [130, 260, 480] },
+  { id: 'heat', name: '골디락스 렌즈', icon: '🔭', desc: '가공 성공존 넓힘', cost: [85, 180] },
+  { id: 'shield', name: '운석 방패', icon: '🛡️', desc: '운석·고장 대응 쉬워짐', cost: [115, 250] },
 ];

@@ -160,7 +160,7 @@ export function startDay(g: Game) {
   g.day += 1;
   g.dayTime = 0; g.dayLen = 45; g.timerPaused = false;
   g.cups = []; g.customers = []; g.thieves = []; g.spots = []; g.meteor = []; g.breach = null; g.flareT = 0; g.supernova = 0; g.rainT = 0; g.gravityT = 0; g.blackoutT = 0; g.alerts = [];
-  g.halfBroken = false; g.spawnT = 1.5; g.disasterT = Math.max(9, 22 - g.day * 2);
+  g.halfBroken = false; g.spawnT = 1.5; g.disasterT = Math.max(6, 17 - g.day * 1.7);
   g.stats = { earned: 0, penalties: 0, served: 0, perfect: 0, lost: 0, start: g.money };
   const newIngs = INGREDIENTS.filter((i) => i.day === g.day);
   newIngs.forEach((i) => (g.stock[i.id] = Math.max(g.stock[i.id], 8)));
@@ -173,8 +173,8 @@ export function startDay(g: Game) {
   sfx.day();
 }
 function endDay(g: Game) {
-  const repair = g.spots.length * 15;
-  const rent = 20 + g.day * 15;
+  const repair = g.spots.length * 35;
+  const rent = 35 + g.day * 25;
   g.money -= repair + rent;
   g.report = { day: g.day, earned: g.stats.earned, penalties: g.stats.penalties, repair, rent, served: g.stats.served, perfect: g.stats.perfect, lost: g.stats.lost, start: g.stats.start, end: g.money };
   g.drag = null; g.holding = null; g.repairing = null;
@@ -352,7 +352,7 @@ function startDisaster(g: Game, type: DisasterType) {
     case 'rain': g.rainT = 10; g.rainTick = 0; g.rainSpot = 2.5; break;
     case 'meteor': {
       const hp = 12 - g.upgrades.shield * 3;
-      g.meteor.push({ t: 0, max: Math.max(6, 10 - g.day * 0.4), hp, maxHp: hp, x: rnd(900, 1350), y: rnd(200, 300), hitT: 0 });
+      g.meteor.push({ t: 0, max: Math.max(4, 7 - g.day * 0.35), hp, maxHp: hp, x: rnd(900, 1350), y: rnd(200, 300), hitT: 0 });
       break;
     }
     case 'gravity': g.gravityT = 8; break;
@@ -633,7 +633,7 @@ export function update(g: Game, dt: number) {
 
   // disasters
   g.disasterT -= dt;
-  if (g.disasterT <= 0) { scheduleDisaster(g); g.disasterT = Math.max(6, 24 - g.day * 3.5) + rnd(0, 6); }
+  if (g.disasterT <= 0) { scheduleDisaster(g); g.disasterT = Math.max(4, 17 - g.day * 2.5) + rnd(0, 4); }
   if (g.flareT > 0) { g.flareT -= dt; if (Math.random() < dt * 3) g.shake += 2; }
   if (g.supernova > 0) g.supernova = Math.max(0, g.supernova - dt * 0.2);
   if (g.rainT > 0) {
