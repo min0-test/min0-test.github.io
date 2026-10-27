@@ -40,11 +40,11 @@ export interface OrderSpec {
 }
 
 export const ORDERS: OrderSpec[] = [
+  { text: '테라포밍된 화성 주세요', bases: ['earth', 'mars'] },
   { text: '창백한 푸른 점', bases: ['earth'] },
   { text: '지구 온난화 체험판 주세요', bases: ['earth'], hot: true },
   { text: '인류가 달에 착륙했대요', bases: ['earth'],tops:['moondust'] },
   { text: '아무래도 지구와 달은 한 세트여야 하지 않을까요?', bases: ['earth'],tops:['moondust'] },
-  { text: '테라포밍된 화성 주세요', bases: ['earth', 'mars'] },
   { text: '화성 갈끄니까~', bases: ['mars'] },
   { text: '레드레드', bases: ['mars'] },
   { text: 'ㄱㅅ ㅈㅅㅇ', bases: ['venus'] },
@@ -57,7 +57,7 @@ export const ORDERS: OrderSpec[] = [
   { text: '가스 행성 2개 섞어줘요', bases: ['jupiter', 'neptune'] },
   { text: '가스 행성들이 너무너무 좋아요', bases: ['jupiter', 'neptune'] },
   { text: '목성이 너무 커. 압축이 필요해.', bases: ['jupiter'], dense:true },
-  { text: '토성 고리 예쁘다', bases: 'any', tops: ['ring'] },
+  { text: '토성 고리 예쁘다', bases: [], tops: ['ring'] },
   { text: '아무거나', bases: 'any' },
   
   { text: '전 음료수가 싫어요.', bases: [], empty: true },
