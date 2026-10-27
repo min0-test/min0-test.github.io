@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { newGame, update, startGame, dropDrag, releaseMachine, takeCup, hitMeteor, TUT_STEPS, W, H, muskSay } from './game/engine';
+import { newGame, update, startGame, startDay, dropDrag, releaseMachine, takeCup, hitMeteor, TUT_STEPS, W, H, muskSay } from './game/engine';
 import type { Game } from './game/engine';
 import { sfx } from './game/audio';
 import { SpaceBg, CafeRoom, Musk, CustomerView, Spots, MeteorView } from './components/Scene';
 import { Counter, type Api } from './components/Counter';
 import { HUD, FX, Weather, Banner, Tutorial, DragGhost, DisasterAlerts, DebugPanel } from './components/Overlay';
-import { GameOver, ManufacturingComplete } from './components/Screens';
+import { DayEnd, GameOver } from './components/Screens';
 import { supabase, fetchMenu, getDeviceOrder, getGuestOrderStatus, createGuestOrder, getSupabaseErrorMessage, subscribeOrders, type MenuItem, type GuestOrder } from './orders/client';
 import { OrderEntry } from './components/OrderEntry';
 
@@ -57,6 +57,12 @@ export default function App() {
   useEffect(() => {
     if (deviceOrder?.status === 'picked_up' && (g.phase === 'over' || g.phase === 'dayEnd')) {
       Object.assign(g, newGame());
+      setFrame((f) => f + 1);
+    } else if (deviceOrder?.status === 'ready' && (g.phase === 'play' || g.phase === 'dayEnd')) {
+      g.phase = 'over';
+      setFrame((f) => f + 1);
+    } else if (deviceOrder?.status === 'queued' && g.phase === 'dayEnd') {
+      startDay(g);
       setFrame((f) => f + 1);
     }
   }, [deviceOrder?.status, g, g.phase, frame]);
@@ -208,10 +214,9 @@ export default function App() {
           <DragGhost g={g} />
           <DebugPanel g={g} />
         </div>}
-        {g.phase === 'dayEnd' && <ManufacturingComplete g={g} deviceNo={deviceNo} ready={deviceOrder?.status === 'ready'} hasOrder={!!deviceOrder} onAcknowledge={() => { Object.assign(g, newGame()); setFrame((f) => f + 1); }} />}
-        {g.phase === 'over' && (deviceOrder?.status === 'ready'
-          ? <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#09051ceF] text-center text-white"><div className="text-[100px]">🥤</div><div className="text-[54px] font-black">음료가 준비됐어요!</div><div className="mt-4 rounded-3xl border-4 border-white/80 bg-violet-950/70 px-10 py-6 text-[30px] font-black">기기 번호 <span className="text-yellow-300">{deviceNo}</span>번에서 수령해 주세요</div><div className="mt-5 text-[20px] font-bold text-violet-200">직원에게 이름을 확인하고 음료를 받아 주세요</div><div className="mt-3 text-[15px] text-violet-300/80">수령이 확인되면 새 주문 화면으로 돌아갑니다</div></div>
-          : <GameOver g={g} message={retryError} onRetry={() => { void replayIfStillQueued(); }} />)}
+        {g.phase === 'dayEnd' && !deviceOrder && <DayEnd g={g} onNext={() => startDay(g)} />}
+        {(g.phase === 'over' || g.phase === 'dayEnd') && deviceOrder?.status === 'ready' && <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#09051ceF] text-center text-white"><div className="text-[100px]">🥤</div><div className="text-[54px] font-black">음료가 준비됐어요!</div><div className="mt-4 rounded-3xl border-4 border-white/80 bg-violet-950/70 px-10 py-6 text-[30px] font-black">기기 번호 <span className="text-yellow-300">{deviceNo}</span>번에서 수령해 주세요</div><div className="mt-5 text-[20px] font-bold text-violet-200">직원에게 이름을 확인하고 음료를 받아 주세요</div><div className="mt-3 text-[15px] text-violet-300/80">수령이 확인되면 새 주문 화면으로 돌아갑니다</div></div>}
+        {g.phase === 'over' && deviceOrder?.status !== 'ready' && <GameOver g={g} message={retryError} onRetry={() => { void replayIfStillQueued(); }} />}
       </div>
       {g.phase === 'title' && createPortal(<OrderEntry deviceNo={deviceNo} menu={menu} loading={orderLoading} connected={!!supabase} menuError={menuError} backendError={orderSyncError} onPlayWithoutOrder={() => { setDeviceOrder(null); setRetryError(''); startGame(g); }} onSubmit={async (customerName, birthdate, menuId) => {
         if (!supabase) return 'Supabase 연결을 확인해 주세요.';

@@ -107,16 +107,6 @@ export function DayEnd({ g, onNext }: { g: Game; onNext: () => void }) {
   );
 }
 
-export function ManufacturingComplete({ g, deviceNo, ready, hasOrder, onAcknowledge }: { g: Game; deviceNo: number; ready: boolean; hasOrder: boolean; onAcknowledge: () => void }) {
-  return <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#09051ceF] px-8 text-center text-white">
-    <div className="text-[110px]">{ready ? '🥤' : '✅'}</div>
-    <div className="text-[58px] font-black">{ready ? '음료가 준비됐어요!' : '제조 완료!'}</div>
-    {ready
-      ? <><div className="mt-4 rounded-3xl border-4 border-white/80 bg-violet-950/70 px-10 py-6 text-[30px] font-black">기기 번호 <span className="text-yellow-300">{deviceNo}</span>번에서 수령해 주세요</div><div className="mt-5 text-[20px] font-bold text-violet-200">직원에게 이름을 확인하고 음료를 받아 주세요</div><div className="mt-3 text-[15px] text-violet-300/80">수령이 확인되면 새 주문 화면으로 돌아갑니다</div></>
-      : <><div className="mt-4 rounded-3xl border-4 border-white/70 bg-emerald-950/70 px-10 py-5 text-[28px] font-black">DAY {g.day} 제조를 마쳤습니다</div><div className="mt-4 text-[18px] font-bold text-violet-200">{hasOrder ? '직원이 음료를 준비하고 있어요. 완료 안내가 오면 기기 번호를 확인해 주세요.' : '게임이 일시 정지되었습니다.'}</div>{!hasOrder && <button className="btn3d mt-8 rounded-[24px] border-[4px] border-white bg-gradient-to-b from-lime-300 to-emerald-500 px-10 py-4 text-[28px] font-black text-emerald-950 shadow-[0_8px_0_#065f46]" onPointerDown={(e) => { e.stopPropagation(); onAcknowledge(); }}>확인</button>}</>}
-  </div>;
-}
-
 export function GameOver({ g, onRetry, message = '' }: { g: Game; onRetry: () => void; message?: string }) {
   const r = g.report;
   return (
