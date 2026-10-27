@@ -129,7 +129,7 @@ export function GameOver({ g, onRetry, message = '' }: { g: Game; onRetry: () =>
       <div className="mt-6 text-[26px] font-black text-rose-200">DAY {g.day} 에서 파산 · 잔고 Ð{Math.round(r?.end ?? g.money)}</div>
       {message && <div className="mt-3 rounded-xl bg-white px-5 py-3 text-lg font-bold text-rose-700">{message}</div>}
       <button className="btn3d mt-8 rounded-[28px] bg-gradient-to-b from-lime-300 to-emerald-500 px-12 py-4 text-[36px] font-black text-emerald-950 shadow-[0_10px_0_#065f46]" style={{ border: '5px solid #fff' }} onPointerDown={(e) => { e.stopPropagation(); onRetry(); }}>
-        다시 출근 (강제) 🔁
+        다시 출근하세요 🔁
       </button>
     </div>
   );

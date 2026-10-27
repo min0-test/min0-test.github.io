@@ -57,19 +57,19 @@ export type Drag = { type: 'ing' | 'cup' | 'hammer'; id: string | number; x: num
 export interface Report { day: number; earned: number; penalties: number; repair: number; rent: number; served: number; perfect: number; lost: number; start: number; end: number }
 
 export const TUT_STEPS = [
-  { text: '어서와 알바생! 난 일론. 우주 한입 사장이야. 화성 갈끄니까 🚀', target: null as null | string, next: true },
-  { text: '손님 주문은 수수께끼야. 일단 ☕컵부터 꺼내! (클릭)', target: 'dispenser', next: false },
+  { text: '어서와 알바생! 난 일론. 우주 한입 사장이야.', target: null as null | string, next: true },
+  { text: '손님 주문은 수수께끼야. 일단 컵부터 꺼내!', target: 'dispenser', next: false },
   { text: '테라포밍은 행성 환경을 인간이 살 수 있게 바꾸는 거야. 이 주문은 지구와 화성을 섞어!', target: 'earth', next: false },
-  { text: '이제 🔴화성도 컵에 넣어!', target: 'mars', next: false },
+  { text: '이제 화성도 컵에 넣어!', target: 'mars', next: false },
   { text: '완성! 컵을 손님한테 끌어다 줘.', target: 'customer', next: false },
   { text: '새 손님이 따뜻한 지구 음료를 주문했어. 먼저 빈 컵을 꺼내자!', target: 'dispenser', next: false },
   { text: '지구 원액을 컵에 넣어. 이 손님의 주문은 지구를 따뜻하게 데우는 거야.', target: 'earth', next: false },
   { text: '컵을 태양 가열기에 넣어 줘.', target: 'heater', next: false },
   { text: '버튼을 꾹 누르고 게이지가 초록 구간일 때 놓아. 너무 오래 누르면 타!', target: 'heaterButton', next: false },
   { text: '따뜻한 음료를 주문한 손님에게 건네 줘.', target: 'customer2', next: false },
-  { text: '도둑이 왔어! 뿅망치를 직접 끌어다 맞혀 쓰러뜨려 봐.', target: 'hammer', next: false },
-  { text: '고장난 곳을 꾹 눌러 직접 수리해 봐. 수리가 끝나면 출근이야!', target: 'repair', next: false },
-  { text: '준비 끝! 이제 진짜 영업을 시작하자. 화성 갈끄니까 🚀', target: null, next: true },
+  { text: '도둑이 왔어! 뿅망치를 끌어다 맞혀 쓰러뜨려 봐.', target: 'hammer', next: false },
+  { text: '고장난 곳을 꾹 눌러 수리해 봐. 수리가 끝나면 출근이야!', target: 'repair', next: false },
+  { text: '준비 끝! 이제 진짜 영업을 시작하자!', target: null, next: true },
 ];
 
 export interface Game {
@@ -168,7 +168,7 @@ export function startDay(g: Game) {
   if (MACHINE_DAY.comp === g.day) news.push('중력 압축기');
   if (news.length) {
     banner(g, '✨', 'NEW! ' + news.join(', '), '#8b5cf6');
-    muskSay(g, MACHINE_DAY.comp === g.day ? '새 장비 중력 압축기! 너무 오래 누르면 블랙홀 됨ㅋ 초록존에서 떼.' : `신메뉴 재료 들어왔어: ${news.join(', ')}. 일해.`, 6);
+    muskSay(g, MACHINE_DAY.comp === g.day ? '새 장비야. 중력 압축기. 가열기처럼 초록존에서 떼.' : `${news.join(', ')}, 새로 들어온 재료야. 일해.`, 6);
   } else muskSay(g, `DAY ${g.day}. 오늘은 더 하드코어하게.`);
   sfx.day();
 }
@@ -203,9 +203,7 @@ function spawnCustomer(g: Game, slot: number, order?: OrderSpec, tut = false, fo
     const pool = ORDERS.filter((o) => o !== other && orderNeeds(o).every((n) => isUnlocked(n, g.day)));
     const specialOrder = special === 'topping'
       ? { ...SPECIAL_ORDERS.topping, tops: INGREDIENTS.filter((i) => i.kind === 'top' && i.day <= g.day).map((i) => i.id) }
-      : special === 'cosplay'
-        ? { ...SPECIAL_ORDERS.cosplay, tops: g.day >= 4 ? ['asteroid'] : [] }
-        : special ? SPECIAL_ORDERS[special] : undefined;
+      : special ? SPECIAL_ORDERS[special] : undefined;
     order = special === 'thief' ? { text: '평범한 손님임. 진짜임. 아무거나 줘.', bases: 'any' } : specialOrder ?? pick(pool);
   }
   const base = special === 'thanos' ? 9 : Math.max(24, 58 - g.day * 6) * (1 + 0.2 * g.upgrades.chair) * (special === 'vip' || special === 'jerk' ? 0.6 : special === 'doge' ? 1.4 : 1);
@@ -220,7 +218,6 @@ export function debugSpawnCustomer(g: Game, special: Exclude<Special, null>) {
   if (slot === undefined) return false;
   let order: OrderSpec | undefined = SPECIAL_ORDERS[special];
   if (special === 'topping') order = { ...SPECIAL_ORDERS.topping, tops: INGREDIENTS.filter((i) => i.kind === 'top' && i.day <= g.day).map((i) => i.id) };
-  if (special === 'cosplay') order = { ...SPECIAL_ORDERS.cosplay, tops: g.day >= 4 ? ['asteroid'] : [] };
   if (special === 'sway') order = undefined;
   spawnCustomer(g, slot, order, false, special);
   return true;
@@ -258,7 +255,7 @@ function serve(g: Game, cup: Cup, c: Customer) {
   const cx = L.custX[c.slot], cy = 330;
   if (c.special === 'thief') {
     addMoney(g, -15, cx, cy - 60);
-    leave(g, c, 'happy', '음료 감사. 금고도 감사 💰');
+    leave(g, c, 'happy', '잘 털어갑니다 💰');
     burst(g, cx, cy, 12, { shapes: ['coin'], speed: 300, g: 600, size: 30 });
     muskSay(g, '저거 도둑이었잖아!! 수염 보면 몰라?');
     sfx.bad(); return;
@@ -384,7 +381,7 @@ export function hitMeteor(g: Game, dmg: number, x?: number, y?: number) {
     burst(g, m.x, m.y, 60, { colors: ['#fb923c', '#f87171', '#fde047', '#78716c'], shapes: ['spark', 'star', 'shard'], speed: 700, size: 30 });
     g.meteor = g.meteor.filter((q) => q !== m); g.shake += 20; g.flash = 0.5; sfx.boom();
     addMoney(g, 15, m.x, m.y); text(g, m.x, m.y - 80, '운석 격파!', '#4ade80', 56);
-    muskSay(g, '방금 지구를 구했군. 수당은 없어.');
+    muskSay(g, '방금 지구를 구했군.');
   }
 }
 
@@ -416,7 +413,7 @@ export function dropDrag(g: Game) {
     const cup = cupAt(g, x, y);
     if (!cup) return;
     const ing = ING[id];
-    if (ingDisabled(g, id)) { text(g, x, y, '녹았어!', '#f87171', 30); sfx.bad(); return; }
+    if (ingDisabled(g, id)) { text(g, x, y, '녹음!', '#f87171', 30); sfx.bad(); return; }
     if (g.stock[id] <= 0) { text(g, x, y, '재고 없음!', '#f87171', 30); sfx.bad(); return; }
     const arr = ing.kind === 'base' ? cup.bases : cup.tops;
     if (arr.includes(id)) { text(g, x, y, '같은 재료는 한 번만!', '#f87171', 26); sfx.bad(); return; }
@@ -458,21 +455,21 @@ export function dropDrag(g: Game) {
       if (t.state !== 'steal') continue;
       const r = ingRect(t.ing);
       if (Math.hypot(r.x + r.w / 2 - x, r.y - 20 - y) < 110) {
-        t.state = 'bonked'; t.anim = 0; bonk(x, y); addMoney(g, 10, x, y - 60); muskSay(g, '나이스 뿅. 그게 바로 보안 시스템이야.');
+        t.state = 'bonked'; t.anim = 0; bonk(x, y); addMoney(g, 10, x, y - 60); muskSay(g, '그게 바로 보안 시스템이야.');
         if (g.tut === 10) { g.tut = 11; const s = { id: g.nextId++, x: 940, y: 450, prog: 0, r: rnd(0, 360) }; g.spots.push(s); }
         return;
       }
     }
     if (inR(L.musk, x, y)) {
       bonk(x, y); g.musk.hitT = 1.2; muskSay(g, pick(MUSK_HIT), 3);
-      if (Math.random() < 0.3) { addMoney(g, 5, x, y - 80); text(g, x, y - 140, '도지코인 떨굼', '#fde047', 30); }
+      if (Math.random() < 0.3) { addMoney(g, 1, x, y - 80); text(g, x, y - 140, '도지코인 떨굼!', '#fde047', 30); }
       return;
     }
     for (const c of g.customers) {
       if (c.state !== 'leave' && inR(custRect(c.slot), x, y)) {
         bonk(x, y); c.hitT = 0.5;
         if (c.special === 'thanos') { c.snapT = 0; leave(g, c, 'ko', '건틀렛을 놓쳤다!'); muskSay(g, '타노스의 스냅을 막았어! 재고를 지켰다.'); return; }
-        if (c.special === 'thief') { leave(g, c, 'ko', '들켰다...'); addMoney(g, 20, x, y - 60); text(g, x, y - 140, '현상금!', '#4ade80', 44); }
+        if (c.special === 'thief') { leave(g, c, 'ko', '들켰다...'); addMoney(g, 8, x, y - 60); text(g, x, y - 140, '현상금!', '#4ade80', 44); }
         else { leave(g, c, 'ko', c.special === 'doge' ? 'much pain. wow.' : '@#$%!!'); addMoney(g, -4, x, y - 60); text(g, x, y - 140, '치료비', '#f87171', 30); g.stats.lost++; if (c.tut) { g.tut = g.tut <= 4 ? 1 : 5; const order = g.tut === 1 ? ORDERS[0] : { text: '따뜻한 지구 음료 한 잔 주세요!', bases: ['earth'], hot: true }; spawnCustomer(g, c.slot, order, true); g.customers = g.customers.filter((q) => q !== c); } }
         return;
       }
@@ -566,7 +563,7 @@ export function update(g: Game, dt: number) {
       if (c.special === 'thanos' && !tut) {
         c.snapT -= dt;
         c.patience = Math.max(0, c.snapT);
-        c.say = c.snapT > 2 ? '나는 필연적인 존재다.' : '인피니티 건틀렛이 빛난다… 막아!'; c.sayT = 0.4;
+        c.say = c.snapT > 2 ? '나는 필연적인 존재다.' : '*건틀렛이 빛난다*'; c.sayT = 0.4;
         if (c.snapT <= 0) {
           const stocked = INGREDIENTS.filter((i) => g.stock[i.id] > 0).map((i) => i.id);
           for (let k = stocked.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [stocked[k], stocked[j]] = [stocked[j], stocked[k]]; }
@@ -575,7 +572,7 @@ export function update(g: Game, dt: number) {
         }
       }
       if (c.patience <= 0 && c.special !== 'thanos') {
-        if (c.special === 'thief') { leave(g, c, 'happy', '지갑 잘 받아감 ㅋ'); addMoney(g, -10, L.custX[c.slot], 300); }
+        if (c.special === 'thief') { leave(g, c, 'happy', '잘 털어갑니다 💰'); addMoney(g, -10, L.custX[c.slot], 300); }
         else { leave(g, c, 'angry', pick(LEAVE_LINES)); addMoney(g, -6, L.custX[c.slot], 300); g.stats.lost++; sfx.bad(); }
       }
     } else if (c.state === 'leave') c.anim += dt;
@@ -599,7 +596,7 @@ export function update(g: Game, dt: number) {
           text(g, p.x, p.y - 150, '블랙홀화!!', '#c084fc', 48);
           burst(g, p.x, p.y - 50, 40, { colors: ['#000', '#7c3aed', '#c084fc', '#fff'], speed: 500, size: 16 });
           g.shake += 18; sfx.blackhole();
-          muskSay(g, '컵이 사건의 지평선 너머로 갔어. 컵값은 월급에서 깜.');
+          muskSay(g, '이게 바로 물리학이지.');
           addMoney(g, -2, p.x, p.y - 100);
         }
         g.holding = null; g.gauge[m] = 0;
@@ -659,7 +656,7 @@ export function update(g: Game, dt: number) {
       addMoney(g, -dmg, 800, 300); text(g, 800, 220, '카페 반파!!!', '#ef4444', 80);
       for (let i = 0; i < 3; i++) addSpot(g);
       burst(g, m.x, m.y, 80, { colors: ['#fb923c', '#ef4444', '#fde047', '#44403c'], shapes: ['spark', 'flame', 'shard'], speed: 900, size: 34, g: 400 });
-      muskSay(g, '운석이 창문 중앙을 뚫었어! 구멍을 꾹 눌러 수리해. 재료와 손님이 빨려나가고 있어!', 5);
+      muskSay(g, '운석이 창문 중앙을 뚫었어! 재료와 손님이 빨려나가고 있어! 당장 수리해!', 5);
     }
   }
   if (g.gravityT > 0) { g.gravityT -= dt; if (g.gravityT <= 0) g.gravityT = -1; }
