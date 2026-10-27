@@ -58,7 +58,7 @@ export default function App() {
     if (deviceOrder?.status === 'picked_up' && (g.phase === 'over' || g.phase === 'dayEnd')) {
       Object.assign(g, newGame());
       setFrame((f) => f + 1);
-    } else if (deviceOrder?.status === 'ready' && (g.phase === 'play' || g.phase === 'dayEnd')) {
+    } else if (deviceOrder?.status === 'ready' && g.phase === 'dayEnd') {
       g.phase = 'over';
       setFrame((f) => f + 1);
     }
